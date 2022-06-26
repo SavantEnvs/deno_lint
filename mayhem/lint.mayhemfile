@@ -1,0 +1,7 @@
+project: deno-lint
+target: lint
+
+cmds:
+  - cmd: /lint
+  - cmd: /lint_no_inst @@
+    libfuzzer: false
