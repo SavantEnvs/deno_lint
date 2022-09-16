@@ -9,7 +9,7 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-deno_ast = "*"
+deno_ast = { version = "0.19.0", features = ["scopes", "transforms", "utils", "visit", "view", "module_specifier"] }
 
 [dependencies.deno_lint]
 path = ".."
