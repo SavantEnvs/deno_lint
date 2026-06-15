@@ -1,0 +1,39 @@
+# Additive cargo-fuzz crate for the Mayhem two-branch model. Upstream denoland/deno_lint ships
+# NO fuzz/ dir, so this crate lives under mayhem/fuzz/ (built via `cargo fuzz build --fuzz-dir
+# mayhem/fuzz`, see mayhem/build.sh) and stays fully separate from the upstream tree — the
+# integration is purely additive (no upstream file is touched).
+#
+# It drives the SAME entry point the old fork target drove: deno_lint::linter::Linter::lint_file.
+# deno_ast is pinned to 0.53.2 — the SAME version the deno_lint crate at the root depends on — so
+# the MediaType / ModuleSpecifier types the harness passes are byte-identical to the ones the
+# library expects (a mismatched deno_ast version would be a distinct, incompatible type).
+[package]
+name = "deno_lint-mayhem-fuzz"
+version = "0.0.0"
+authors = ["Mayhem integration"]
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+# Isolated sub-workspace so cargo-fuzz builds it independently of the deno_lint crate.
+[workspace]
+members = ["."]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+deno_ast = { version = "0.53.2", features = ["scopes", "transforms", "utils", "visit", "view", "react"] }
+
+# ../..: this crate lives at mayhem/fuzz/, so the deno_lint crate is two levels up.
+[dependencies.deno_lint]
+path = "../.."
+
+[[bin]]
+name = "lint"
+path = "fuzz_targets/lint.rs"
+test = false
+doc = false
+
+[profile.release]
+debug = true
