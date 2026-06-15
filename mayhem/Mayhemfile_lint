@@ -1,0 +1,14 @@
+# Mayhem target: deno_lint's lint pipeline (deno_lint::linter::Linter::lint_file) — deno_ast/swc
+# parse of arbitrary JS/TS source + every lint rule. Built by mayhem/build.sh as a libFuzzer
+# binary (cargo-fuzz) at /mayhem/lint. Old fork target name `lint` preserved.
+project: savantenvs/deno_lint
+target: lint
+# Canonical two-entry seed directive (docs/seed-corpus.md): the server tar is REQUIRED or the
+# corpus never accumulates (#124), and the local path must be RELATIVE — an absolute file:///
+# aborts run-creation on the CI runner (#158). Seeds relocated to the per-target path.
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/lint/testsuite
+cmds:
+  - cmd: /mayhem/lint
+    libfuzzer: true
