@@ -1,0 +1,50 @@
+# Additive cargo-fuzz crate for the Mayhem two-branch model. Upstream denoland/deno_lint ships
+# NO fuzz/ dir, so this crate lives under mayhem/fuzz/ (built via `cargo fuzz build --fuzz-dir
+# mayhem/fuzz`, see mayhem/build.sh) and stays fully separate from the upstream tree — the
+# integration is purely additive (no upstream file is touched).
+#
+# It drives the SAME entry point the old fork target drove: deno_lint::linter::Linter::lint.
+# deno_ast is pinned to 0.19.0 — the SAME version this UPSTREAM revision's deno_lint crate
+# depends on — so the MediaType type the harness passes is byte-identical to the one the library
+# expects (a mismatched deno_ast version would be a distinct, incompatible type).
+[package]
+name = "deno_lint-mayhem-fuzz"
+version = "0.0.0"
+authors = ["Mayhem integration"]
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+# Isolated sub-workspace so cargo-fuzz builds it independently of the deno_lint crate.
+[workspace]
+members = ["."]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+deno_ast = { version = "=0.19.0", features = ["scopes", "transforms", "utils", "visit", "module_specifier"] }
+# This isolated sub-workspace resolves its own lockfile, independent of the root Cargo.lock
+# (which pins a known-good 2022-era swc/proc-macro toolchain for deno_ast 0.19.0). Left
+# unpinned, the resolver picks the newest semver-compatible proc-macro2/syn/swc_macros_common/
+# string_enum, and string_enum's derive macro (built against an older swc_macros_common::def_site
+# signature) fails to compile against them. Pin the same versions the root Cargo.lock already
+# proved buildable at this commit.
+proc-macro2 = "=1.0.36"
+syn = "=1.0.94"
+quote = "=1.0.15"
+swc_macros_common = "=0.3.6"
+string_enum = "=0.3.1"
+
+# ../..: this crate lives at mayhem/fuzz/, so the deno_lint crate is two levels up.
+[dependencies.deno_lint]
+path = "../.."
+
+[[bin]]
+name = "lint"
+path = "fuzz_targets/lint.rs"
+test = false
+doc = false
+
+[profile.release]
+debug = true

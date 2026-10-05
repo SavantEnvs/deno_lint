@@ -1,0 +1,9 @@
+# Mayhem target: deno_lint's lint pipeline (deno_lint::linter::Linter::lint) — deno_ast/swc
+# parse of arbitrary JS/TS source + every lint rule. Built by mayhem/build.sh as a libFuzzer
+# binary (cargo-fuzz) at /mayhem/lint. Old fork target name `lint` preserved.
+project: savantenvs/deno_lint
+target: lint-buggy-mhh-run-16
+# origin: https://app.mayhem.security/mayhemheroes/deno-lint/lint/16
+cmds:
+  - cmd: /mayhem/lint
+    libfuzzer: true
